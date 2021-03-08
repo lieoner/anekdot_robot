@@ -28,7 +28,7 @@ loadNetFromFile = () => {
 };
 const trainNet = (net, anekData) => {
     console.log('начало урока');
-    maxIts = 1000;
+    maxIts = 500;
     net.train(anekData, {
         iterations: maxIts,
         logPeriod: maxIts / 10,

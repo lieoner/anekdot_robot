@@ -74,7 +74,7 @@ bot.on('message', (message) => {
             console.log(ocenka);
             anekData.push(ocenka);
             curAnekdot = '';
-            fs.writeFileSync('./baza_anekdotov.json', JSON.stringify(anekData));
+            fs.writeFileSync('./baza_anekdotov.json', JSON.stringify(anekData, null, 2));
         }
     }
     if (message.content == `${prefix}несмешно`) {
@@ -83,12 +83,12 @@ bot.on('message', (message) => {
             console.log(ocenka);
             anekData.push(ocenka);
             curAnekdot = '';
-            fs.writeFileSync('./baza_anekdotov.json', JSON.stringify(anekData));
+            fs.writeFileSync('./baza_anekdotov.json', JSON.stringify(anekData, null, 2));
         }
     }
     if (message.content == `${prefix}оценка`) {
         if (curAnekdot.length) {
-            var jsonNetwork = JSON.parse(fs.readFileSync('./json_network.json'));
+            var jsonNetwork = JSON.parse(fs.readFileSync('./json_network1k.json'));
             var net = new brain.recurrent.GRU();
 
             net.fromJSON(jsonNetwork);

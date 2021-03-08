@@ -1,18 +1,19 @@
 {
-  "name": "friendlybot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "saltuxa",
-  "license": "ISC",
-  "dependencies": {
-    "@discordjs/opus": "^0.3.3",
-    "axios": "^0.21.1",
-    "brain.js": "^2.0.0-beta.2",
-    "discord.js": "^12.5.1",
-    "opusscript": "0.0.7"
-  }
+    "name": "friendlybot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "saltuxa",
+    "license": "ISC",
+    "dependencies": {
+        "@discordjs/opus": "^0.3.3",
+        "axios": "^0.21.1",
+        "brain.js": "^2.0.0-beta.2",
+        "discord.js": "^12.5.1",
+        "opusscript": "0.0.7"
+    }
 }
