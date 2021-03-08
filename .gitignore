@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+baza_anekdotov.json
+json_network.json
+json_network1k.json
