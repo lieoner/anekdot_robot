@@ -1,14 +1,18 @@
 const axios = require('axios').default;
+const ytToken = require('./token.json').ytToken;
+const searchYoutube = require('youtube-api-v3-search');
+const ytdl = require('ytdl-core');
 const brain = require('brain.js');
-const { Client } = require('discord.js');
+const { Client, MessageEmbed } = require('discord.js');
 const fs = require('fs');
 const auth = require('./config.json');
+const token = require('./token.json').token;
 
 const bot = new Client();
 const prefix = auth.prefix;
-let block = false;
-let delay = 0;
-let res = [];
+
+let connection = null;
+
 var emojis = auth.emojis;
 
 var anekData = require('./baza_anekdotov.json');
@@ -24,50 +28,43 @@ bot.once('ready', async () => {
     console.log('Ready!');
 });
 
-bot.on('voiceStateUpdate', async (oldState, newState) => {
-    if (!block) {
-        if (
-            newState.channel &&
-            (newState.channel.id == '797048356953260087' ||
-                newState.channel.id == '766644399253225479' ||
-                newState.channel.id == '807909087249170462') &&
-            // newState.channel.id == 'xxxx' &&
-            newState.channelID !== null &&
-            oldState.channelID != newState.channelID
-        ) {
-            console.log();
-            block = true;
-            const connection = await newState.channel.join();
-            let rand = randomInteger(0, res.length);
+bot.on('message', async (message) => {
+    if (message.content.startsWith(`${prefix}п`)) {
+        let voiceChannel = message.member.voice.channel;
+        if (!voiceChannel) {
+            return message.reply('Ты в войс зайди бля');
+        }
+        connection = await voiceChannel.join();
 
-            const dispatcher = connection.play(`./playlist/${res[rand]}`, {
-                volume: 0.4,
-            });
-            dispatcher.on('start', () => {
-                console.log(res[rand] + ' is now playing!');
-                delay = setTimeout(() => {
-                    try {
-                        console.log(res[rand] + ' has force finished playing!');
-                        block = false;
-                        connection.disconnect();
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }, 30000);
-            });
+        const args = message.content.slice(3).trim();
+        if (args.length) {
+            let url = args;
+            try {
+                if (!args.startsWith('https://')) {
+                    let { videoID } = await searchYouTubeVideoID(args);
+                    url = `https://www.youtube.com/watch?v=${videoID}`;
+                }
 
-            dispatcher.on('finish', () => {
-                clearTimeout(delay);
-                console.log(res[rand] + ' has finished playing!');
-                block = false;
-                connection.disconnect();
-            });
-            // Always remember to handle errors appropriately!
-            dispatcher.on('error', console.error);
+                let info = await ytdl.getInfo(url);
+                console.log(info.videoDetails.title);
+                connection.play(
+                    await ytdl(args, {
+                        volume: 0.4,
+                        filter: 'audioonly',
+                    })
+                );
+                const botResponse = new MessageEmbed().setDescription(
+                    `Играет вот это: [${info.videoDetails.title}](${url})`
+                );
+                return message.channel.send(botResponse);
+            } catch (error) {
+                return message.reply('Я уебался блять!');
+            }
+        } else {
+            return message.reply('А чо играть?');
         }
     }
-});
-bot.on('message', (message) => {
+
     if (message.content == `${prefix}смешно`) {
         if (curAnekdot.length) {
             var ocenka = { input: curAnekdot, output: 'смешно' };
@@ -150,4 +147,57 @@ bot.on('message', (message) => {
     }
 });
 
-bot.login(auth.token);
+bot.login(token);
+
+async function searchYouTubeVideoID(args) {
+    let res = await searchYoutube(ytToken, {
+        q: args,
+        type: 'video',
+    });
+    return { videoID: res.items[0].id.videoId, videoName: res.items[0].snippet.title };
+}
+
+// bot.on('voiceStateUpdate', async (oldState, newState) => {
+//     if (!block) {
+//         if (
+//             // newState.channel &&
+//             // (newState.channel.id == '797048356953260087' ||
+//             //     newState.channel.id == '797048356953260086' ||
+//             //     newState.channel.id == '766644399253225479' ||
+//             //     newState.channel.id == '807909087249170462')
+//             // newState.channel.id == 'xxxx' &&
+//             // newState.channelID !== null &&
+//             // oldState.channelID != newState.channelID
+//         ) {
+//             console.log(newState.channel);
+//             block = true;
+//             const connection = await newState.channel.join();
+//             let rand = randomInteger(0, res.length);
+
+//             const dispatcher = connection.play(`./playlist/${res[rand]}`, {
+//                 volume: 0.4,
+//             });
+//             dispatcher.on('start', () => {
+//                 console.log(res[rand] + ' is now playing!');
+//                 delay = setTimeout(() => {
+//                     try {
+//                         console.log(res[rand] + ' has force finished playing!');
+//                         block = false;
+//                         connection.disconnect();
+//                     } catch (error) {
+//                         console.log(error);
+//                     }
+//                 }, 30000);
+//             });
+
+//             dispatcher.on('finish', () => {
+//                 clearTimeout(delay);
+//                 console.log(res[rand] + ' has finished playing!');
+//                 block = false;
+//                 connection.disconnect();
+//             });
+//             // Always remember to handle errors appropriately!
+//             dispatcher.on('error', console.error);
+//         }
+//     }
+// });
